@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PATIENCE.exe — Are You Legit?</title>
+  <meta name="description" content="A retro patience test. Only the truly patient and honest make it to the end. Do you have what it takes?" />
+  <meta name="theme-color" content="#0A0A0F" />
+
+  <!-- Retro Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <!-- ============================================ -->
+  <!-- STAGE 1: SYSTEM BOOT                         -->
+  <!-- ============================================ -->
+  <div id="stage-1" class="stage active">
+    <div class="terminal-container">
+      <div class="terminal-header">
+        <span class="terminal-dot red"></span>
+        <span class="terminal-dot yellow"></span>
+        <span class="terminal-dot green"></span>
+        <span class="terminal-title">PATIENCE.exe v2.1.0</span>
+      </div>
+      <div class="terminal-body">
+        <div id="boot-log" class="boot-log"></div>
+        <div id="boot-cursor" class="blinking-cursor">▌</div>
+      </div>
+      <div class="progress-container" id="progress-container-1" style="opacity:0;">
+        <div class="progress-label">SYSTEM BOOT</div>
+        <div class="progress-bar">
+          <div id="progress-1" class="progress-fill green-fill"></div>
+        </div>
+        <span id="progress-1-pct" class="progress-pct">0%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- STAGE 2: ESTABLISHING CONNECTION             -->
+  <!-- ============================================ -->
+  <div id="stage-2" class="stage">
+    <div class="connection-container">
+      <h2 class="section-title glow-blue">ESTABLISHING CONNECTION</h2>
+      <pre id="ascii-art" class="ascii-art"></pre>
+      <div id="connection-status" class="status-text">Searching for patience server...</div>
+      <div class="progress-container">
+        <div class="progress-label">CONNECTION</div>
+        <div class="progress-bar wide">
+          <div id="progress-2" class="progress-fill blue-fill"></div>
+        </div>
+        <span id="progress-2-pct" class="progress-pct">0%</span>
+      </div>
+      <div id="click-taunt" class="click-taunt"></div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- STAGE 3: SECURITY CLEARANCE                  -->
+  <!-- ============================================ -->
+  <div id="stage-3" class="stage">
+    <div class="security-container">
+      <h2 class="section-title glitch" data-text="SECURITY CLEARANCE">SECURITY CLEARANCE</h2>
+      <div id="code-scroll" class="code-scroll"></div>
+      <div id="taunt-messages" class="taunt-messages"></div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- STAGE 4: FINAL LOADING                       -->
+  <!-- ============================================ -->
+  <div id="stage-4" class="stage">
+    <div class="final-container">
+      <div id="crash-text" class="crash-text"></div>
+      <div id="final-progress-wrap" class="progress-container large" style="opacity:0;">
+        <div class="progress-label rainbow-text">FINAL LOADING</div>
+        <div class="progress-bar wide">
+          <div id="progress-4" class="progress-fill rainbow-fill"></div>
+        </div>
+        <span id="progress-4-pct" class="progress-pct">0%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- STAGE 5: THE REWARD                          -->
+  <!-- ============================================ -->
+  <div id="stage-5" class="stage">
+    <div class="reward-container">
+      <div id="confetti-container" class="confetti-container"></div>
+      <h1 class="reward-title">
+        <span class="glow-pink">YOU MADE IT.</span><br />
+        <span class="glow-blue">YOU'RE LEGIT.</span>
+      </h1>
+      <div class="patience-timer">
+        You waited <span id="wait-time" class="highlight-number">0</span> seconds. <em class="glow-amber">Respect.</em>
+      </div>
+      <div class="stats-card glass">
+        <p>📊 Only <strong class="glow-lime">12%</strong> of visitors make it this far.</p>
+      </div>
+      <div class="certificate glass">
+        <div class="cert-badge">🏆</div>
+        <h3 class="cert-title">CERTIFICATE OF PATIENCE</h3>
+        <div class="cert-divider"></div>
+        <p class="cert-text">This certifies that <strong>YOU</strong> are officially patient and legit.</p>
+        <p class="cert-date" id="cert-date"></p>
+        <div class="cert-seal">✦ VERIFIED ✦</div>
+      </div>
+      <button id="share-btn" class="retro-btn">📤 SHARE YOUR ACHIEVEMENT</button>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

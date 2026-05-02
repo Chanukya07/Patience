@@ -1,0 +1,734 @@
+/* ==========================================
+   PATIENCE.exe — Retro Design System
+   ========================================== */
+
+/* --- CSS Variables (Neon Palette) --- */
+:root {
+  --neon-pink: #FF006E;
+  --electric-blue: #00F5FF;
+  --lime: #39FF14;
+  --amber: #FFB800;
+  --deep-purple: #2D0050;
+  --dark-bg: #0A0A0F;
+  --crt-green: #33FF33;
+  --white: #F0F0F0;
+  --dark-glass: rgba(15, 15, 25, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.08);
+
+  --font-pixel: 'Press Start 2P', monospace;
+  --font-terminal: 'VT323', monospace;
+
+  --transition-stage: 0.6s ease;
+}
+
+/* --- Global Reset --- */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--dark-bg);
+  color: var(--white);
+  font-family: var(--font-terminal);
+}
+
+/* --- CRT Scanline Overlay --- */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15) 0px,
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 9999;
+  animation: scanline-scroll 8s linear infinite;
+}
+
+@keyframes scanline-scroll {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(6px); }
+}
+
+/* --- Screen Flicker --- */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  pointer-events: none;
+  z-index: 9998;
+  animation: flicker 0.15s infinite alternate;
+}
+
+@keyframes flicker {
+  0% { opacity: 1; }
+  50% { opacity: 0.985; }
+  100% { opacity: 1; }
+}
+
+/* --- Stage System --- */
+.stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-stage), visibility var(--transition-stage);
+  z-index: 1;
+}
+
+.stage.active {
+  opacity: 1;
+  visibility: visible;
+  z-index: 10;
+}
+
+/* ==========================================
+   STAGE 1: SYSTEM BOOT
+   ========================================== */
+
+.terminal-container {
+  width: min(90vw, 700px);
+  background: rgba(0, 0, 0, 0.85);
+  border: 2px solid var(--crt-green);
+  border-radius: 8px;
+  box-shadow:
+    0 0 20px rgba(51, 255, 51, 0.15),
+    0 0 60px rgba(51, 255, 51, 0.05),
+    inset 0 0 30px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(51, 255, 51, 0.08);
+  border-bottom: 1px solid rgba(51, 255, 51, 0.2);
+}
+
+.terminal-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+.terminal-dot.red { background: #FF5F56; }
+.terminal-dot.yellow { background: #FFBD2E; }
+.terminal-dot.green { background: #27C93F; }
+
+.terminal-title {
+  font-family: var(--font-pixel);
+  font-size: clamp(0.45rem, 1.5vw, 0.65rem);
+  color: var(--crt-green);
+  margin-left: 8px;
+  letter-spacing: 1px;
+}
+
+.terminal-body {
+  padding: 20px;
+  min-height: 280px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.boot-log {
+  font-family: var(--font-terminal);
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
+  color: var(--crt-green);
+  line-height: 1.8;
+}
+
+.boot-log .log-line {
+  opacity: 0;
+  animation: fadeInLine 0.3s forwards;
+}
+
+.boot-log .log-line .ok {
+  color: var(--lime);
+  text-shadow: 0 0 8px var(--lime);
+}
+
+.boot-log .log-line .processing {
+  color: var(--amber);
+  text-shadow: 0 0 8px var(--amber);
+}
+
+.boot-log .log-line .fail {
+  color: var(--neon-pink);
+  text-shadow: 0 0 8px var(--neon-pink);
+}
+
+@keyframes fadeInLine {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.blinking-cursor {
+  font-family: var(--font-terminal);
+  font-size: 1.3rem;
+  color: var(--crt-green);
+  animation: blink 0.7s step-end infinite;
+  display: inline-block;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* ==========================================
+   PROGRESS BARS
+   ========================================== */
+
+.progress-container {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: opacity 0.4s ease;
+}
+
+.progress-label {
+  font-family: var(--font-pixel);
+  font-size: clamp(0.4rem, 1.2vw, 0.55rem);
+  color: var(--white);
+  white-space: nowrap;
+  min-width: 100px;
+  letter-spacing: 1px;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar.wide {
+  height: 28px;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s steps(20);
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    transparent 8px,
+    rgba(0, 0, 0, 0.3) 8px,
+    rgba(0, 0, 0, 0.3) 10px
+  );
+}
+
+.green-fill {
+  background: var(--crt-green);
+  box-shadow: 0 0 15px var(--crt-green), inset 0 0 10px rgba(51, 255, 51, 0.3);
+}
+
+.blue-fill {
+  background: var(--electric-blue);
+  box-shadow: 0 0 15px var(--electric-blue), inset 0 0 10px rgba(0, 245, 255, 0.3);
+}
+
+.rainbow-fill {
+  background: linear-gradient(
+    90deg,
+    var(--neon-pink),
+    var(--amber),
+    var(--lime),
+    var(--electric-blue),
+    var(--neon-pink)
+  );
+  background-size: 200% 100%;
+  animation: rainbow-shift 2s linear infinite;
+  box-shadow: 0 0 20px rgba(255, 0, 110, 0.4), 0 0 40px rgba(0, 245, 255, 0.2);
+}
+
+@keyframes rainbow-shift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+.progress-pct {
+  font-family: var(--font-pixel);
+  font-size: clamp(0.5rem, 1.5vw, 0.7rem);
+  color: var(--white);
+  min-width: 40px;
+  text-align: right;
+}
+
+.progress-container.large {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+  max-width: 600px;
+  width: 90vw;
+}
+
+.progress-container.large .progress-label {
+  text-align: center;
+}
+
+.progress-container.large .progress-pct {
+  text-align: center;
+}
+
+/* ==========================================
+   STAGE 2: ESTABLISHING CONNECTION
+   ========================================== */
+
+.connection-container {
+  text-align: center;
+  width: min(90vw, 600px);
+}
+
+.section-title {
+  font-family: var(--font-pixel);
+  font-size: clamp(0.7rem, 2vw, 1rem);
+  letter-spacing: 2px;
+  margin-bottom: 24px;
+}
+
+.glow-blue {
+  color: var(--electric-blue);
+  text-shadow: 0 0 10px var(--electric-blue), 0 0 30px rgba(0, 245, 255, 0.3);
+}
+
+.glow-pink {
+  color: var(--neon-pink);
+  text-shadow: 0 0 10px var(--neon-pink), 0 0 30px rgba(255, 0, 110, 0.3);
+}
+
+.glow-lime {
+  color: var(--lime);
+  text-shadow: 0 0 10px var(--lime), 0 0 30px rgba(57, 255, 20, 0.3);
+}
+
+.glow-amber {
+  color: var(--amber);
+  text-shadow: 0 0 10px var(--amber), 0 0 30px rgba(255, 184, 0, 0.3);
+}
+
+.ascii-art {
+  font-family: var(--font-terminal);
+  font-size: clamp(0.6rem, 1.8vw, 1rem);
+  color: var(--electric-blue);
+  text-shadow: 0 0 5px var(--electric-blue);
+  margin: 20px auto;
+  line-height: 1.3;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-text {
+  font-family: var(--font-terminal);
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  color: var(--amber);
+  margin: 16px 0;
+  min-height: 30px;
+}
+
+.click-taunt {
+  font-family: var(--font-pixel);
+  font-size: clamp(0.4rem, 1.2vw, 0.6rem);
+  color: var(--neon-pink);
+  min-height: 20px;
+  margin-top: 16px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.click-taunt.visible {
+  opacity: 1;
+}
+
+/* ==========================================
+   STAGE 3: SECURITY CLEARANCE
+   ========================================== */
+
+.security-container {
+  text-align: center;
+  width: min(90vw, 700px);
+}
+
+/* Glitch Effect */
+.glitch {
+  position: relative;
+  color: var(--lime);
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.glitch::before {
+  color: var(--neon-pink);
+  animation: glitch-1 0.3s infinite linear alternate-reverse;
+  clip-path: inset(20% 0 40% 0);
+}
+
+.glitch::after {
+  color: var(--electric-blue);
+  animation: glitch-2 0.3s infinite linear alternate-reverse;
+  clip-path: inset(60% 0 10% 0);
+}
+
+@keyframes glitch-1 {
+  0% { transform: translate(2px, -1px); }
+  25% { transform: translate(-2px, 1px); }
+  50% { transform: translate(1px, 2px); }
+  75% { transform: translate(-1px, -2px); }
+  100% { transform: translate(2px, 1px); }
+}
+
+@keyframes glitch-2 {
+  0% { transform: translate(-2px, 1px); }
+  25% { transform: translate(2px, -1px); }
+  50% { transform: translate(-1px, -2px); }
+  75% { transform: translate(1px, 2px); }
+  100% { transform: translate(-2px, -1px); }
+}
+
+.code-scroll {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(57, 255, 20, 0.2);
+  border-radius: 4px;
+  padding: 16px;
+  margin: 24px 0;
+  height: 180px;
+  overflow: hidden;
+  text-align: left;
+  font-family: var(--font-terminal);
+  font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+  color: rgba(57, 255, 20, 0.5);
+  line-height: 1.6;
+  position: relative;
+}
+
+.code-scroll::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  pointer-events: none;
+}
+
+.taunt-messages {
+  font-family: var(--font-pixel);
+  font-size: clamp(0.5rem, 1.5vw, 0.75rem);
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.taunt-line {
+  opacity: 0;
+  animation: tauntAppear 0.5s forwards;
+  color: var(--amber);
+  text-shadow: 0 0 8px rgba(255, 184, 0, 0.4);
+}
+
+.taunt-line.granted {
+  color: var(--lime);
+  text-shadow: 0 0 15px var(--lime);
+  font-size: clamp(0.6rem, 1.8vw, 0.85rem);
+}
+
+@keyframes tauntAppear {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================
+   STAGE 4: FINAL LOADING
+   ========================================== */
+
+.final-container {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.crash-text {
+  font-family: var(--font-terminal);
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  color: var(--white);
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rainbow-text {
+  background: linear-gradient(
+    90deg,
+    var(--neon-pink),
+    var(--amber),
+    var(--lime),
+    var(--electric-blue)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200%;
+  animation: rainbow-shift 3s linear infinite;
+}
+
+/* ==========================================
+   STAGE 5: THE REWARD
+   ========================================== */
+
+.reward-container {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 40px 20px;
+  max-height: 100vh;
+  overflow-y: auto;
+  width: 100%;
+  position: relative;
+}
+
+.confetti-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.confetti-particle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: -20px;
+  animation: confetti-fall linear forwards;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(720deg) scale(0.3);
+    opacity: 0;
+  }
+}
+
+.reward-title {
+  font-family: var(--font-pixel);
+  font-size: clamp(1.2rem, 4vw, 2.5rem);
+  line-height: 1.6;
+  letter-spacing: 2px;
+  animation: rewardPulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes rewardPulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.03); }
+}
+
+.patience-timer {
+  font-family: var(--font-terminal);
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  color: var(--white);
+}
+
+.highlight-number {
+  font-family: var(--font-pixel);
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  color: var(--electric-blue);
+  text-shadow: 0 0 15px var(--electric-blue), 0 0 30px rgba(0, 245, 255, 0.3);
+}
+
+/* Glassmorphism Cards */
+.glass {
+  background: var(--dark-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 24px 32px;
+  max-width: 500px;
+  width: 90vw;
+}
+
+.stats-card p {
+  font-family: var(--font-terminal);
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  line-height: 1.6;
+}
+
+/* Certificate */
+.certificate {
+  border: 2px solid var(--amber);
+  box-shadow: 0 0 20px rgba(255, 184, 0, 0.15), inset 0 0 30px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.certificate::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px dashed rgba(255, 184, 0, 0.3);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.cert-badge {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+}
+
+.cert-title {
+  font-family: var(--font-pixel);
+  font-size: clamp(0.5rem, 1.8vw, 0.85rem);
+  color: var(--amber);
+  text-shadow: 0 0 10px rgba(255, 184, 0, 0.4);
+  letter-spacing: 3px;
+  margin-bottom: 12px;
+}
+
+.cert-divider {
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--amber), transparent);
+  margin: 0 auto 16px;
+}
+
+.cert-text {
+  font-family: var(--font-terminal);
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  color: var(--white);
+  line-height: 1.6;
+}
+
+.cert-text strong {
+  color: var(--lime);
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.4);
+}
+
+.cert-date {
+  font-family: var(--font-terminal);
+  font-size: clamp(0.8rem, 1.5vw, 1rem);
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 12px;
+}
+
+.cert-seal {
+  font-family: var(--font-pixel);
+  font-size: clamp(0.4rem, 1.2vw, 0.6rem);
+  color: var(--electric-blue);
+  text-shadow: 0 0 10px var(--electric-blue);
+  margin-top: 16px;
+  letter-spacing: 4px;
+}
+
+/* Retro Button */
+.retro-btn {
+  font-family: var(--font-pixel);
+  font-size: clamp(0.5rem, 1.5vw, 0.7rem);
+  color: var(--dark-bg);
+  background: var(--electric-blue);
+  border: none;
+  padding: 16px 32px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  position: relative;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 0 #009DAA, 0 0 20px rgba(0, 245, 255, 0.3);
+  border-radius: 4px;
+}
+
+.retro-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #009DAA, 0 0 30px rgba(0, 245, 255, 0.5);
+}
+
+.retro-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #009DAA, 0 0 15px rgba(0, 245, 255, 0.2);
+}
+
+/* ==========================================
+   REDUCED MOTION
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================
+   SCROLLBAR
+   ========================================== */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
