@@ -1,4 +1,4 @@
-# 🕹️ PATIENCE.exe
+# 🕹️ PATIENCE
 
 > **A retro-themed patience test website. Only the truly patient and honest make it to the end.**
 
